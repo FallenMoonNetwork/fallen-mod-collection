@@ -1,8 +1,11 @@
 package net.thefallenmoon.fmc.ui.material.components;
 
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL20;
+
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.thefallenmoon.fmc.core.render.ShaderProgram;
 import net.thefallenmoon.fmc.core.utils.ResourceUtils;
@@ -10,8 +13,6 @@ import net.thefallenmoon.fmc.ui.FallenUIMod;
 import net.thefallenmoon.fmc.ui.material.ComponentBase;
 import net.thefallenmoon.fmc.ui.material.ComponentBounds;
 import net.thefallenmoon.fmc.ui.material.bounds.StartEndComponentBounds;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL20;
 
 public class Paper extends ComponentBase {
     private float elevation;
@@ -55,8 +56,11 @@ public class Paper extends ComponentBase {
     @Override
     public void render() {
         //Paper box
-        GlStateManager.disableLighting();
-        GlStateManager.disableFog();
+    	//TODO: Are these necessary?
+    	//
+        //GlStateManager.disableLighting();
+    	//GlStateManager.disableFog();
+        //
         GlStateManager.disableTexture2D();
         GlStateManager.enableBlend();
         GlStateManager.disableAlpha();
@@ -65,7 +69,7 @@ public class Paper extends ComponentBase {
 
 
         Tessellator tess = Tessellator.getInstance();
-        VertexBuffer buffer = tess.getBuffer();
+        BufferBuilder buffer = tess.getBuffer();
 
         if (drawShadow) {
             shader.enable();
@@ -78,11 +82,15 @@ public class Paper extends ComponentBase {
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
         drawPaperBackground(buffer);
         tess.draw();
-
+                
+        //Reenable these two as without these FontRenderers wont render properly!
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+        
         super.render();
     }
 
-    private void drawPaperBackground(VertexBuffer buffer) {
+    private void drawPaperBackground(BufferBuilder buffer) {
         ComponentBounds bounds = getBounds();
         buffer.pos(bounds.getX(), bounds.getEndY(), 0).color(r, g, b, 255).endVertex();
         buffer.pos(bounds.getEndX(), bounds.getEndY(), 0).color(r, g, b, 255).endVertex();
@@ -90,13 +98,19 @@ public class Paper extends ComponentBase {
         buffer.pos(bounds.getX(), bounds.getY(), 0).color(r, g, b, 255).endVertex();
     }
 
-    private void drawShadow(VertexBuffer buffer) {
+    private void drawShadow(BufferBuilder buffer) {
         float shadowSize = 50;
         float blur = elevation;
 
+        /*
+         * TODO: Unused stuff, what to do?
+         * 
+        
         int startAlpha = 255;
         int endAlpha = 0;
-
+        
+        */
+        
         ComponentBounds bounds = getBounds();
         ComponentBounds shadowBounds = new StartEndComponentBounds(
                 bounds.getX() - shadowSize,
